@@ -1,49 +1,98 @@
 # AI-Powered Bug Analyzer Service
 
-An AI-inspired Bug Analyzer API built using **FastAPI**. This project analyzes software bug reports, assigns a severity level, identifies probable root causes, and recommends possible fixes.
+An AI-inspired Bug Analyzer REST API built with **FastAPI** that analyzes software bug reports, assigns a severity level, identifies probable root causes, and recommends potential fixes.
 
 > **Current Status:** Week 1 MVP (Heuristic-Based Analysis)
 
-The current implementation uses rule-based heuristics to simulate AI-powered bug analysis. The architecture is designed so that the analysis engine can later be replaced with an actual LLM (OpenAI, Claude, Gemini, etc.) without changing the API.
+The current implementation uses a modular, rule-based heuristic engine to simulate AI-powered bug analysis. The project architecture has been intentionally designed so that the heuristic engine can later be replaced by an LLM (OpenAI, Gemini, Claude, etc.) with minimal changes to the API layer.
 
 ---
 
-## Features
+# Features
 
-- Analyze software bug reports
-- Automatic bug severity classification
-- Probable root cause identification
-- Recommended fixes
-- Architectural impact assessment
-- Interactive Swagger API documentation
-- Structured request and response validation using Pydantic
-
----
-
-## Tech Stack
-
-- Python 3.10+
-- FastAPI
-- Uvicorn
-- Pydantic
+* AI-inspired bug analysis
+* Automatic severity classification
+* Probable root cause identification
+* Actionable fix recommendations
+* Architectural impact assessment
+* Interactive Swagger UI documentation
+* Modular FastAPI architecture
+* Pydantic request and response validation
+* Easily extensible heuristic engine
+* Service-oriented backend structure
 
 ---
 
-## Project Structure
+# Tech Stack
 
-```
-project/
+* Python 3.10+
+* FastAPI
+* Uvicorn
+* Pydantic
+
+---
+
+# Project Structure
+
+```text
+bug-analyzer/
 │
-├── main.py
+├── app/
+│   ├── main.py
+│   │
+│   ├── api/
+│   │   └── routes.py
+│   │
+│   ├── core/
+│   │   ├── analyzer.py
+│   │   └── heuristics.py
+│   │
+│   ├── services/
+│   │   └── bug_service.py
+│   │
+│   ├── models/
+│   │   └── schemas.py
+│   │
+│   └── utils/
+│       └── constants.py
+│
 ├── requirements.txt
-└── README.md
+├── README.md
+└── .gitignore
 ```
 
 ---
 
-## Installation
+# Project Architecture
 
-### 1. Clone the repository
+```
+                    Client
+                       │
+                       ▼
+               FastAPI Routes
+                       │
+                       ▼
+             BugAnalysisService
+                       │
+                       ▼
+                 BugAnalyzer
+                       │
+         ┌─────────────┼─────────────┐
+         ▼             ▼             ▼
+ Database Rule   Authentication   UI Rule
+                      Rule
+                       │
+                       ▼
+              BugAnalysisResponse
+```
+
+Each layer has a single responsibility, making the project easier to maintain, test, and extend.
+
+---
+
+# Installation
+
+## 1. Clone the Repository
 
 ```bash
 git clone <repository-url>
@@ -52,21 +101,21 @@ cd <repository-name>
 
 ---
 
-### 2. Create a Virtual Environment
+## 2. Create a Virtual Environment
 
-Windows
+### Windows
 
 ```bash
 python -m venv .venv
 ```
 
-Activate
+Activate the environment:
 
 ```bash
 .venv\Scripts\activate
 ```
 
-macOS/Linux
+### Linux / macOS
 
 ```bash
 python3 -m venv .venv
@@ -75,49 +124,29 @@ source .venv/bin/activate
 
 ---
 
-### 3. Install Dependencies
-
-```bash
-pip install fastapi uvicorn
-```
-
-or
+## 3. Install Dependencies
 
 ```bash
 pip install -r requirements.txt
 ```
 
+or
+
+```bash
+pip install fastapi uvicorn pydantic
+```
+
 ---
 
-## Running the API
+# Running the Application
 
-Start the development server using:
+Start the FastAPI development server:
 
 ```bash
 uvicorn app.main:app --reload
 ```
 
-If your file has a different name, replace **main** with the filename.
-
-Example
-
-If the file is named
-
-```
-bug_service.py
-```
-
-then run
-
-```bash
-uvicorn bug_service:app --reload
-```
-
----
-
-## Expected Output
-
-After starting successfully, the terminal should display something similar to:
+Expected output:
 
 ```text
 INFO:     Uvicorn running on http://127.0.0.1:8000
@@ -128,67 +157,53 @@ INFO:     Application startup complete.
 
 ---
 
-## Accessing the API
+# API Documentation
 
-### Root Endpoint
+After the server starts successfully:
 
-Open:
+| Endpoint                    | Description         |
+| --------------------------- | ------------------- |
+| http://127.0.0.1:8000       | Health Check        |
+| http://127.0.0.1:8000/docs  | Swagger UI          |
+| http://127.0.0.1:8000/redoc | ReDoc Documentation |
 
-```
-http://127.0.0.1:8000/
-```
+---
 
-Expected response:
+# API Endpoints
+
+## Health Check
+
+**GET /**
+
+Response
 
 ```json
 {
-    "status": "online",
-    "message": "Bug Analyzer API is running. Go to /docs for Swagger UI."
+  "status": "online",
+  "message": "Bug Analyzer API is running.",
+  "docs": "/docs"
 }
 ```
 
 ---
 
-### Swagger Documentation
+## Analyze Bug Report
 
-Open:
+**POST /api/v1/analyze**
 
-```
-http://127.0.0.1:8000/docs
-```
-
-Swagger UI allows you to test the API directly from your browser.
-
-Available endpoints:
-
-- GET /
-- POST /api/v1/analyze
-
----
-
-## Sample Request
-
-POST
-
-```
-/api/v1/analyze
-```
-
-Request Body
+### Sample Request
 
 ```json
 {
   "title": "Database connection timeout on login",
-  "description": "Users are facing 504 gateway timeouts during login.",
-  "logs": "Connection pool exhausted",
+  "description": "Users are experiencing login failures due to database connection timeouts.",
+  "logs": "ERROR connection pool exhausted",
   "stack_trace": "auth.py line 42",
   "component": "Authentication"
 }
 ```
 
----
-
-## Sample Response
+### Sample Response
 
 ```json
 {
@@ -197,137 +212,122 @@ Request Body
   "confidence_score": 0.91,
   "probable_root_causes": [
     "Connection pool exhaustion under heavy load.",
-    "Missing database index on frequently queried lookup keys."
+    "Missing database indexes on frequently queried fields."
   ],
   "recommended_fixes": [
-    "Increase the maximum pool size.",
-    "Implement retry with exponential backoff."
+    "Increase database connection pool size.",
+    "Add indexes to frequently queried columns.",
+    "Implement retry logic with exponential backoff."
   ],
-  "architectural_impact": "Medium risk. Could slow down adjacent services."
+  "architectural_impact": "Medium risk. Database bottlenecks may impact multiple dependent services."
 }
 ```
 
 ---
 
-## Bug Analysis Logic
-
-The MVP currently uses simple keyword-based heuristics.
-
-Examples:
-
-| Keyword | Severity |
-|----------|----------|
-| database, db, connection | HIGH |
-| login, auth, token | CRITICAL |
-| ui, display, null | LOW |
-| Others | MEDIUM |
-
-This logic can later be replaced by an AI model or LLM without changing the API interface.
-
----
-
-## API Workflow
+# Bug Analysis Workflow
 
 ```
-Client
-   │
-   ▼
-POST Request
-   │
-   ▼
-FastAPI
-   │
-   ▼
-Pydantic Validation
-   │
-   ▼
-Bug Analysis Engine
-   │
-   ▼
-Generate Response
-   │
-   ▼
-Return JSON
+Bug Report
+     │
+     ▼
+Request Validation
+     │
+     ▼
+BugAnalysisService
+     │
+     ▼
+BugAnalyzer
+     │
+     ▼
+Execute Heuristic Rules
+     │
+     ▼
+Generate Analysis
+     │
+     ▼
+Return JSON Response
 ```
 
 ---
 
-## Common Issues
+# Heuristic Rules
 
-### ModuleNotFoundError
+The current MVP uses keyword-based heuristics.
 
-Install dependencies:
+| Keywords                          | Assigned Severity |
+| --------------------------------- | ----------------- |
+| database, db, connection, timeout | HIGH              |
+| login, auth, token, jwt           | CRITICAL          |
+| ui, display, frontend, null       | LOW               |
+| No matching rule                  | MEDIUM            |
+
+Each heuristic is implemented independently, making the system easy to extend with additional rules.
+
+---
+
+# Design Principles
+
+The project follows several software engineering best practices:
+
+* Modular project architecture
+* Separation of concerns
+* Service layer pattern
+* Single Responsibility Principle (SRP)
+* Reusable heuristic engine
+* Typed request and response models
+* Easily replaceable analysis engine
+
+---
+
+# Future Roadmap
+
+* LLM integration (OpenAI, Gemini, Claude)
+* Persistent database storage
+* Historical bug analysis
+* Semantic search using vector databases
+* User authentication
+* Docker support
+* CI/CD with GitHub Actions
+* Unit testing with pytest
+* Logging and monitoring
+* Configuration management using environment variables
+
+---
+
+# Common Issues
+
+## ModuleNotFoundError
+
+Verify that you are running the server from the project root directory:
 
 ```bash
-pip install fastapi uvicorn
+uvicorn app.main:app --reload
 ```
 
 ---
 
-### Port Already in Use
+## Port Already in Use
 
-Run on another port:
+Run the application on a different port:
 
 ```bash
-uvicorn main:app --reload --port 8001
+uvicorn app.main:app --reload --port 8001
 ```
 
 ---
 
-### 404 Not Found
+## Missing Dependencies
 
-Verify that you are visiting:
-
-```
-http://127.0.0.1:8000/
-```
-
-or
-
-```
-http://127.0.0.1:8000/docs
-```
-
----
-
-### File Name Error
-
-If your application file is not named `main.py`, update the command accordingly.
-
-Example:
+Install all required packages:
 
 ```bash
-uvicorn app:app --reload
-```
-
-where
-
-```
-app.py
-```
-
-contains
-
-```python
-app = FastAPI()
+pip install -r requirements.txt
 ```
 
 ---
 
-## Future Improvements
+# License
 
-- OpenAI / Gemini integration
-- LLM-powered bug reasoning
-- Vector database for historical bug search
-- Authentication
-- Database integration
-- Bug history tracking
-- CI/CD pipeline
-- Docker support
-- Unit and integration tests
+This project is intended for educational, demonstration, and learning purposes.
 
----
-
-## License
-
-This project is intended for educational and demonstration purposes.
