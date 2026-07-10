@@ -94,7 +94,7 @@ pip install -r requirements.txt
 Start the development server using:
 
 ```bash
-uvicorn main:app --reload
+uvicorn app.main:app --reload
 ```
 
 If your file has a different name, replace **main** with the filename.
